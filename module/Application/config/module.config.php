@@ -10,7 +10,9 @@
 return array(
     'router' => array(
         'routes' => array(
-            'home' => array(
+            
+        		
+        	'home' => array(
                 'type' => 'Zend\Mvc\Router\Http\Literal',
                 'options' => array(
                     'route'    => '/',
@@ -19,7 +21,35 @@ return array(
                         'action'     => 'index',
                     ),
                 ),
+           	),
+
+        		
+            'param' => array(
+            		'type' => 'Zend\Mvc\Router\Http\Literal',
+           			'options' => array(
+        					'route'    => '/param',
+            				'defaults' => array(
+            						'controller' => 'Application\Controller\Index',
+            						'action'     => 'param',
+            				),
+           			),
             ),
+            
+            
+            
+            'model' => array(
+            		'type' => 'Zend\Mvc\Router\Http\Literal',
+            		'options' => array(
+            				'route'    => '/model',
+            				'defaults' => array(
+            						'controller' => 'Application\Controller\Index',
+            						'action'     => 'model',
+            				),
+            		),
+            ),
+
+            
+            
             // The following is a route to simplify getting started creating
             // new controllers and actions without needing to create a new
             // module. Simply drop new controllers in, and you can access them
@@ -50,6 +80,8 @@ return array(
                     ),
                 ),
             ),
+            
+            
         ),
     ),
     'service_manager' => array(

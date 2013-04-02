@@ -12,10 +12,22 @@ namespace Application\Controller;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 
-class IndexController extends AbstractActionController
-{
-    public function indexAction()
-    {
+class IndexController extends AbstractActionController {
+    
+	protected $I_model;
+	
+	public function indexAction() {
         return new ViewModel();
     }
+    
+    public function paramAction() {
+    	$m_value = $this->getRequest()->getQuery('name', null);
+    	return new ViewModel(array('user_name' => $m_value));
+    }
+    
+   public function modelAction() {
+   		$this->I_model = new \Application\Model\SimpleClass();
+    	return new ViewModel(array('iterations' => $this->I_model->getValue()));
+    }
+    
 }
