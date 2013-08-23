@@ -22,20 +22,33 @@ class Module
 
     	$s_env = getenv('APPLICATION_ENV');
 
-    	if (empty($s_env)) {
-    		throw new Exception('Environment not set. Cannot continue. Too risky!');
+    	// Application configuration
+    	$I_application = $I_e->getParam('application');
+    	$am_config = $I_application->getConfig();
+
+    	// Are we running safely in this environment?
+    	try {
+    		$this->checkEnv($s_env, $am_config);
+    	} catch (\Exception $I_exception) {
+
+    		// $I_e = new \Zend\Mvc\MvcEvent();
+    		$I_em = $I_application->getEventManager();
+    		$I_e->setParam('exception', $I_exception);
+    		$I_e->setParam('error', \Zend\Mvc\Application::ERROR_EXCEPTION);
+    		$I_e->setName(MvcEvent::EVENT_DISPATCH_ERROR);
+
+    		$I_em->trigger($I_e);
+
     	}
 
     	// Proper environment name is sent to the view part (for CSS or other customizations, if needed)
-    	$I_application = $I_e->getParam('application');
     	$I_viewModel = $I_application->getMvcEvent()->getViewModel();
     	$I_viewModel->environment = $s_env;
 
     	// Environment configuration parameters are set
-        $am_config = $I_application->getConfig();
         $this->loadConfig($am_config);
 
-    }
+	}
 
     /**
      * Application configuration is returned
@@ -59,6 +72,40 @@ class Module
         );
     }
 
+
+    /**
+     * Checks whether application can run on current host w/ current env settings
+     *
+     * @param string $s_currentEnvironment
+     * @param array $am_appConf application configuration
+     * @return boolean
+     */
+    private function checkEnv($s_currentEnvironment, $am_appConf) {
+
+		if (empty($s_currentEnvironment)) {
+			throw new Exception('Environment not set. Cannot continue. Too risky!');
+		}
+
+	    if (!array_key_exists('mvlabs_environment', $am_appConf) ||
+	        !array_key_exists('allowed_hosts', $am_appConf['mvlabs_environment']) ||
+	        !is_array($am_appConf['mvlabs_environment']['allowed_hosts']) ||
+	        count($am_appConf['mvlabs_environment']['allowed_hosts']) == 0
+	   	    ) {
+			// No checks are enforced
+	    	return;
+	   	}
+
+	   	$s_hostName = gethostname();
+
+	    if (!in_array($s_hostName, $am_appConf['mvlabs_environment']['allowed_hosts'])) {
+	    	throw new Exception('Application is not supposed to run with ' . $s_currentEnvironment .
+	    			            ' configuration on host ' . $s_hostName.
+	    			            '. Did you remember to set allowed_hosts param on file configuration.'.$s_currentEnvironment.'.php? '
+	    			           );
+	    }
+
+    }
+
     /**
      * Takes care of loading mvlabs environment configuration parameters
      *
@@ -71,26 +118,32 @@ class Module
     		$am_environmentConf = $am_config['mvlabs_environment'];
 
     		// PHP Settings are Set
-    		if (array_key_exists('php_settings', $am_environmentConf)) {
+    		if (array_key_exists('php_settings', $am_environmentConf) &&
+    		    is_array($am_environmentConf['php_settings'])) {
     			$this->setPhpEnvVars($am_environmentConf['php_settings']);
     		}
 
     		// Should we attempt to recover from fatal errors also - IE w/ a Redirection to a nicely crafted page?
-    		if (array_key_exists('recover_from_fatal', $am_environmentConf) && $am_environmentConf['recover_from_fatal']) {
+    		if (array_key_exists('recover_from_fatal', $am_environmentConf) &&
+    		    $am_environmentConf['recover_from_fatal']) {
 
     			// @TODO: I'm sure there's a better way to obtain this...
     			$s_redirectUrl = $am_config['router']['routes']['error']['options']['route'];
 
-    			$s_callback = $am_environmentConf['fatal_errors_callback'];
+    			$s_callback = null;
+    			if (array_key_exists('fatal_errors_callback', $am_environmentConf)) {
+    				$s_callback = $am_environmentConf['fatal_errors_callback'];
+    			}
 
-    			register_shutdown_function(array('Application\Module', 'handleFatalPhpErrors'), $s_redirectUrl, $s_callback);
+    			register_shutdown_function(array('Application\Module', 'handleFatalPhpErrors'),
+    			                           $s_redirectUrl, $s_callback);
     		}
 
     		// Should PHP errors be turned into exceptions?
-    		if (array_key_exists('exceptions_from_errors', $am_environmentConf) && $am_environmentConf['exceptions_from_errors']) {
+    		if (array_key_exists('exceptions_from_errors', $am_environmentConf) &&
+    		    $am_environmentConf['exceptions_from_errors']) {
     			set_error_handler(array('Application\Module','handlePhpErrors'));
     		}
-
 
     		// Timezone is set
     		$s_timeZone = (array_key_exists('default_timezone', $am_environmentConf)?$am_environmentConf['default_timezone']:'Europe/London');
@@ -139,7 +192,7 @@ class Module
 
     		if (null != $s_callback) {
 
-    			// This is the most stuff we can get, since all of this happens in a "new context" outside of framework
+    			// This is the most stuff we can get. All of this happens in a "new context" outside of framework
     			$m_code = isset($e['type']) ? $e['type'] : 0;
     			$s_msg = isset($e['message']) ? $e['message'] : '';
     			$s_file = isset($e['file']) ? $e['file'] : '';

@@ -26,7 +26,7 @@ require 'init_autoloader.php';
 $s_env = getenv('APPLICATION_ENV');
 if (empty($s_env)) {
 	// We cannot allow application to be run without knowing what environment we're in
-	throw new Exception('Environment not set. Cannot continue. Too risky!');
+	throw new \Exception('Environment not set. Cannot continue. Too risky!');
 }
 
 // Application nominal environment
@@ -44,10 +44,12 @@ if (file_exists($s_environmentConfFile) &&
 	$am_environmentConf = require $s_environmentConfFile;
 	$am_conf = Zend\Stdlib\ArrayUtils::merge($am_originalConf, $am_environmentConf);
 
-	// Additional Specific configuration files are also taken into account
-	$am_conf["module_listener_options"]["config_glob_paths"][] =  'config/autoload/{,*.}' . $s_env . '.php';
-
 }
+
+// Additional Specific configuration files are also taken into account
+$am_conf["module_listener_options"]["config_glob_paths"][] =  'config/autoload/{,*.}' . $s_env . '.php';
+
+
 
 // Let's run application!
 Zend\Mvc\Application::init($am_conf)->run();
