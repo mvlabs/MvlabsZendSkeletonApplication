@@ -1,27 +1,20 @@
 <?php
 
 /**
- * Add this line in your conf
- * # Set the environment
- * SetEnv APPLICATION_ENV "dev"
+ * ZF2 Skeleton application main configuration file
+ *
+ * @link      http://github.com/mvlabs/MvlabsZendSkeletonApplication
+ * @license   Please view the LICENSE file that was distributed with this source code
+ * @author    Steve Maraspin <steve@mvlabs.it>
+ * @package   MvlabsZendSkeletonApplication
  */
 
-$env = getenv('APPLICATION_ENV') ?: 'production';
-
-// Use the $env value to determine which modules to load
-$modules = array(
-    'Application',
-);
-
-//specific env modules
-if ($env == 'dev') {
-    $modules[] = 'ZendDeveloperTools';
-}
-
 return array(
-    
-    'modules' => $modules,
-    
+
+    'modules' => array(
+                       'Application',
+                      ),
+
     // These are various options for the listeners attached to the ModuleManager
     'module_listener_options' => array(
         // This should be an array of paths in which modules reside.
@@ -38,7 +31,6 @@ return array(
         // provided by modules themselves. Paths may use GLOB_BRACE notation.
         'config_glob_paths' => array(
             'config/autoload/{,*.}{global,local}.php',
-            'config/autoload/{,*.}' . $env . '.php',
         ),
 
         // Whether or not to enable a configuration cache.

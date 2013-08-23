@@ -1,10 +1,7 @@
 <?php
 
 /**
- * MV Labs ZF2 Skeleton application Module.php
- *
- * This file doesn't do much. It's placed here for compatibility with ZendFramework 2's ModuleManager.
- * Original Module.php is in 'src/Application', so to respect PSR-0
+ * MV Labs ZF2 Skeleton application default exception
  *
  * @copyright Copyright (c) 2010-2013 MV Labs (http://www.mvlabs.it)
  * @link      http://github.com/mvlabs/MvlabsZendSkeletonApplication
@@ -13,4 +10,8 @@
  * @package   MvlabsZendSkeletonApplication
  */
 
-require_once __DIR__ . '/src/Application/Module.php';
+namespace Application;
+
+class Exception extends \Exception {
+
+}
