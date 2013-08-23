@@ -111,7 +111,8 @@ return array(
             'error/404'               => __DIR__ . '/../view/error/404.phtml',
 
             // A nice page showing nothing about reasons for error (users do not care)
-            'error/index'             => __DIR__ . '/../view/error/index.phtml',
+            // 'error/index'             => __DIR__ . '/../view/error/index.phtml',
+            'error/index'             => __DIR__ . '/../view/error/debug.phtml',
 
         ),
         'template_path_stack' => array(
@@ -137,7 +138,10 @@ return array(
 
 		},
 
-		'default_timezone' => 'Europe/Rome',
+		// by default, there are no environment/host restrictions
+		'allowed_hosts' => null,
+
+		'default_timezone' => 'Europe/London',
 
 	),
 
