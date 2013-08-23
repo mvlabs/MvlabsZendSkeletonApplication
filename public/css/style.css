@@ -3,6 +3,25 @@ body {
     padding-bottom: 40px;
 }
 
+body.dev .navbar-inverse {
+    background-image: linear-gradient(to bottom, #7AB317 0px, #8bc920 100%);
+    background-repeat: repeat-x;
+}
+
+body.stage .navbar-inverse {
+    background-image: linear-gradient(to bottom, #2058c9 0px, #195ade 100%);
+    background-repeat: repeat-x;
+}
+
+body.dev .navbar-inverse a {
+    color: #333;
+}
+
+body.stage .navbar-inverse a {
+    color: #ddd;
+}
+
+
 .zf-green {
     color: #68b604;
 }
