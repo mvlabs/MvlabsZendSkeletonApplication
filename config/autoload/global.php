@@ -24,6 +24,20 @@ return array(
 				),
 		),
 
+		'translator' => array(
+				'translation_file_patterns' => array(
+
+						array(
+								'type'        => 'phparray',
+								'base_dir'    => __DIR__ . '/../../../vendor/zendframework/zendframework/resources/languages',
+								'pattern'     => '/it/Zend_Validate.php',//%s
+								'text_domain' => 'default'
+						),
+
+				),
+		),
+
+
 		'mvlabs_environment' => array(
 
 			// Set this w/ the timezone of your running application
@@ -33,8 +47,8 @@ return array(
 			// Available locales are listed here. Default(above) must be among them
 			'locale' => array(
 					'available' => array(
-							'it' => array('language' => 'it-IT', 'name' => 'Italiano'),
-							'en' => array('language' => 'en-US', 'name' => 'Inglese'),
+							'it' => array('language' => 'it_IT', 'name' => 'Italiano'),
+							'en' => array('language' => 'en_US', 'name' => 'Inglese'),
 					),
 			),
 

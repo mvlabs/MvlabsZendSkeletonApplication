@@ -122,7 +122,7 @@ class Module {
     	}
 
     	$I_translator = $I_application->getServiceManager()->get('translator');
-    	$I_translator->setLocale($s_lang);
+    	$I_translator->setLocale($am_languageConfig['available'][$s_lang]['language']);
 
     	/*
     	$s_basePath = $I_app->getRequest()->getBasePath();
@@ -188,7 +188,7 @@ class Module {
      * @param integer $i_line
      * @throws Exception
      */
-    private static function handlePhpErrors($i_type, $s_message, $s_file, $i_line) {
+    public static function handlePhpErrors($i_type, $s_message, $s_file, $i_line) {
     	if (!($i_type & error_reporting())) return;
     	throw new Exception("Error: " . $s_message . " in file " . $s_file . " at line " . $i_line);
     }
@@ -200,7 +200,7 @@ class Module {
      * @param string $s_redirectUrl URL where user is directed to after a fatal has occurred
      * @param string $s_callback callback function to be called - IE for specific mailing/logging purposes
      */
-    private static function handleFatalPhpErrors($s_redirectUrl, $s_callback = null) {
+    public static function handleFatalPhpErrors($s_redirectUrl, $s_callback = null) {
 
     	if (php_sapi_name() != 'cli' && @is_array($e = @error_get_last())) {
 

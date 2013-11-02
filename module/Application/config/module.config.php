@@ -101,12 +101,7 @@ return array(
     						'base_dir' => __DIR__ . '/../resource/language',
     						'pattern'  => '%s.mo',
     				),
-    				array(
-    						'type'        => 'phparray',
-    						'base_dir'    => __DIR__ . '/../../../vendor/zendframework/zendframework/resources/languages',
-    						'pattern'     => '/it/Zend_Validate.php',//%s
-    						'text_domain' => 'default'
-    				),
+
     				array(
     						'type'        => 'phparray',
     						'base_dir'    => __DIR__ . '/../languages',
