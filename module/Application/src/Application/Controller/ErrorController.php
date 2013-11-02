@@ -16,6 +16,7 @@ namespace Application\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
+use Zend\Mvc\MvcEvent;
 use Application\Module;
 
 class ErrorController extends AbstractActionController
@@ -23,12 +24,14 @@ class ErrorController extends AbstractActionController
 
 	public function indexAction() {
 
-		$this->getResponse()->setStatusCode(500);
+		// This can be intercepted for logging purposes, for instance...
+		$this->getEventManager()->trigger('app_issue', $this, array('message' => 'A critical Error Has Occurred'));
 
-		$I_vm = new ViewModel();
-		$I_vm->setTemplate('error/index');
-
-		return $I_vm;
+		// throw new \RuntimeException('Error page has been reached. Most likely a fatal error has previously occurred');
+		$response = $this->getResponse();
+		$response->setStatusCode(500);
+		$response->setContent("A critical Error has Occurred");
+		return $response;
 
     }
 

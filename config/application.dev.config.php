@@ -17,6 +17,7 @@ return array(
 
     	'modules' => array(
                        'ZendDeveloperTools',
+    				   'MvlabsLumber'
                       ),
 
         'config_cache_enabled' => false,

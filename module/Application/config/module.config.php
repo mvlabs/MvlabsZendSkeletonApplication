@@ -12,16 +12,45 @@ return array(
 	'router' => array(
         'routes' => array(
 
-        	'home' => array(
-                'type' => 'Zend\Mvc\Router\Http\Literal',
-                'options' => array(
-                    'route'    => '/',
-                    'defaults' => array(
-                        'controller' => 'Application\Controller\Index',
-                        'action'     => 'index',
-                    ),
-                ),
-            ),
+        	/*
+        	'lang' => array(
+        		'route' => ':it.dev.skel.it',
+        		'constraints' => array(
+        				'subdomain' => 'it',
+        	)
+        	*/
+
+        	'locale' => array(
+       				'type'    => 'Zend\Mvc\Router\Http\Segment',
+        			'options' => array(
+        					'route'    => '/[:locale]',
+        					'constraints' => array(
+        							'locale' => '[a-zA-Z]{2}',
+        					),
+        					'defaults' => array(
+        							'controller' => 'Application\Controller\Index',
+        							'action'     => 'index',
+        					),
+        			),
+
+        			'may_terminate' => true,
+        			'child_routes' => array(
+        					'default' => array(
+        							'type'    => 'Segment',
+        							'options' => array(
+        									'route'    => '/[:controller[/:action]]',
+        									'constraints' => array(
+        											'controller' => '[a-zA-Z][a-zA-Z0-9_-]*',
+        											'action'     => '[a-zA-Z][a-zA-Z0-9_-]*',
+        									),
+        									'defaults' => array(
+        									),
+        							),
+        					),
+        			),
+
+        	),
+
 
         	// This route is used to handle redirections when fatal errors occur
         	// Better to have a nice page, rather than an ugly blank one
@@ -36,66 +65,57 @@ return array(
         			),
         	),
 
-            // The following is a route to simplify getting started creating
-            // new controllers and actions without needing to create a new
-            // module. Simply drop new controllers in, and you can access them
-            // using the path /application/:controller/:action
-            'application' => array(
-                'type'    => 'Literal',
-                'options' => array(
-                    'route'    => '/application',
-                    'defaults' => array(
-                        '__NAMESPACE__' => 'Application\Controller',
-                        'controller'    => 'Index',
-                        'action'        => 'index',
-                    ),
-                ),
-                'may_terminate' => true,
-                'child_routes' => array(
-                    'default' => array(
-                        'type'    => 'Segment',
-                        'options' => array(
-                            'route'    => '/[:controller[/:action]]',
-                            'constraints' => array(
-                                'controller' => '[a-zA-Z][a-zA-Z0-9_-]*',
-                                'action'     => '[a-zA-Z][a-zA-Z0-9_-]*',
-                            ),
-                            'defaults' => array(
-                            ),
-                        ),
-                    ),
-                ),
-            ),
+
+        	// Either a "select language" page can be created, or user can be redirected
+        	// to proper location (default). Change language action in controller to allow manual language selection
+        	'home' => array(
+        			'type' => 'Zend\Mvc\Router\Http\Literal',
+        			'options' => array(
+        					'route'    => '/',
+        					'defaults' => array(
+        							'controller' => 'Application\Controller\Index',
+        							'action'     => 'language',
+        					),
+        			),
+        	),
+
+
         ),
     ),
 
-    'service_manager' => array(
-        'abstract_factories' => array(
-            'Zend\Cache\Service\StorageCacheAbstractServiceFactory',
-            'Zend\Log\LoggerAbstractServiceFactory',
-        ),
-        'aliases' => array(
-            'translator' => 'MvcTranslator',
-        ),
-    ),
-
-    'translator' => array(
-        'locale' => 'en_US',
-        'translation_file_patterns' => array(
-            array(
-                'type'     => 'gettext',
-                'base_dir' => __DIR__ . '/../language',
-                'pattern'  => '%s.mo',
-            ),
-        ),
-    ),
 
     'controllers' => array(
         'invokables' => array(
-            'Application\Controller\Index' => 'Application\Controller\IndexController',
             'Application\Controller\Error' => 'Application\Controller\ErrorController',
         ),
+        'factories' => array(
+        	'Application\Controller\Index' => 'Application\Controller\IndexControllerFactory',
+        ),
     ),
+
+
+    'translator' => array(
+    		'translation_file_patterns' => array(
+    				array(
+    						'type'     => 'gettext',
+    						'base_dir' => __DIR__ . '/../resource/language',
+    						'pattern'  => '%s.mo',
+    				),
+    				array(
+    						'type'        => 'phparray',
+    						'base_dir'    => __DIR__ . '/../../../vendor/zendframework/zendframework/resources/languages',
+    						'pattern'     => '/it/Zend_Validate.php',//%s
+    						'text_domain' => 'default'
+    				),
+    				array(
+    						'type'        => 'phparray',
+    						'base_dir'    => __DIR__ . '/../languages',
+    						'pattern'     => '/it/MVLabs_Validate.php',//%s
+    						'text_domain' => 'default'
+    				)
+    		),
+    ),
+
 
     'view_manager' => array(
 
@@ -119,31 +139,6 @@ return array(
             __DIR__ . '/../view',
         ),
     ),
-
-    'mvlabs_environment' => array(
-
-		'php_settings' => array(
-			'error_reporting'  =>  E_ALL,
-			'display_errors' => 'Off',
-			'display_startup_errors' => 'Off',
-		),
-
-		'exceptions_from_errors' => true,
-		'recover_from_fatal' => true,
-		'fatal_errors_callback' => function($s_msg, $s_file, $s_line) {
-
-			// Override this param if you need special logging
-			// Default PHP logging is still going to work
-			return false;
-
-		},
-
-		// by default, there are no environment/host restrictions
-		'allowed_hosts' => null,
-
-		'default_timezone' => 'Europe/London',
-
-	),
 
 
     // Placeholder for console routes

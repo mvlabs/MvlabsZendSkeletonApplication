@@ -18,4 +18,10 @@ class IndexController extends AbstractActionController {
 		return new ViewModel();
     }
 
+    public function languageAction() {
+
+    	return $this->redirect()->toRoute("locale",array("locale"=>"it"));
+
+    }
+
 }

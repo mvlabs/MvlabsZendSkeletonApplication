@@ -60,8 +60,6 @@ return array(
 				'exceptions_from_errors' => true,
 				'recover_from_fatal' => false,
 
-				'default_timezone' => 'Europe/Rome',
-
 				// here you should set the hostname of your development host(s)
 				// dev configuration will be allowed to run here only!
 				'allowed_hosts' => array('dev', 'my.development.host', 'my-collegue.development.host')

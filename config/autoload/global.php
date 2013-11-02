@@ -12,5 +12,51 @@
  */
 
 return array(
-    // ...
+
+
+		'service_manager' => array(
+				'abstract_factories' => array(
+						'Zend\Cache\Service\StorageCacheAbstractServiceFactory',
+						'Zend\Log\LoggerAbstractServiceFactory',
+				),
+				'aliases' => array(
+						'translator' => 'MvcTranslator',
+				),
+		),
+
+		'mvlabs_environment' => array(
+
+			// Set this w/ the timezone of your running application
+			'timezone' => 'Europe/London',
+
+
+			// Available locales are listed here. Default(above) must be among them
+			'locale' => array(
+					'available' => array(
+							'it' => array('language' => 'it-IT', 'name' => 'Italiano'),
+							'en' => array('language' => 'en-US', 'name' => 'Inglese'),
+					),
+			),
+
+			'php_settings' => array(
+					'error_reporting'  =>  E_ALL,
+					'display_errors' => 'Off',
+					'display_startup_errors' => 'Off',
+			),
+
+			'exceptions_from_errors' => true,
+			'recover_from_fatal' => true,
+			'fatal_errors_callback' => function($s_msg, $s_file, $s_line) {
+
+				// Override this param if you need special logging
+				// Default PHP logging is still going to work
+				return false;
+
+			},
+
+			// by default, there are no environment/host restrictions
+			'allowed_hosts' => null,
+
+		),
+
 );
