@@ -16,19 +16,11 @@ class IndexController extends AbstractActionController {
 
 	private $I_translator;
 
-	public function __construct($I_translator) {
-		$this->I_translator = $I_translator;
+	public function __construct() {
 	}
 
 	public function indexAction() {
 		return new ViewModel();
-    }
-
-    public function languageAction() {
-
-
-    	return $this->redirect()->toRoute("locale",array("locale"=>"it"));
-
     }
 
 }

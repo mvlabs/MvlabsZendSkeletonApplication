@@ -68,13 +68,13 @@ return array(
 
         	// Either a "select language" page can be created, or user can be redirected
         	// to proper location (default). Change language action in controller to allow manual language selection
-        	'home' => array(
+        	'language-select' => array(
         			'type' => 'Zend\Mvc\Router\Http\Literal',
         			'options' => array(
         					'route'    => '/',
         					'defaults' => array(
-        							'controller' => 'Application\Controller\Index',
-        							'action'     => 'language',
+        							'controller' => 'Application\Controller\Language',
+        							'action'     => 'index',
         					),
         			),
         	),
@@ -87,9 +87,10 @@ return array(
     'controllers' => array(
         'invokables' => array(
             'Application\Controller\Error' => 'Application\Controller\ErrorController',
+            'Application\Controller\Index' => 'Application\Controller\IndexController',
         ),
         'factories' => array(
-        	'Application\Controller\Index' => 'Application\Controller\IndexControllerFactory',
+        	'Application\Controller\Language' => 'Application\Controller\LanguageControllerFactory',
         ),
     ),
 

@@ -50,6 +50,7 @@ return array(
 							'it' => array('language' => 'it_IT', 'name' => 'Italiano'),
 							'en' => array('language' => 'en_US', 'name' => 'Inglese'),
 					),
+					'default' => 'it',
 			),
 
 			'php_settings' => array(

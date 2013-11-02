@@ -4,7 +4,7 @@ namespace Application\Controller;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
-class IndexControllerFactory implements FactoryInterface
+class LanguageControllerFactory implements FactoryInterface
 {
     /**
      * {@inheritDoc}
@@ -16,9 +16,9 @@ class IndexControllerFactory implements FactoryInterface
     	$am_config = $serviceLocator->getServiceLocator()->get('config');
         $I_translator = $serviceLocator->getServiceLocator()->get('translator');
 
-        $am_transParams = array('translator' => $I_translator, 'defaultLanguage' => );
+        $am_transParams = array('translator' => $I_translator, 'languages' => $am_config['mvlabs_environment']['locale']);
 
-        return new IndexController($am_transParams);
+        return new LanguageController($am_transParams);
 
     }
 }
