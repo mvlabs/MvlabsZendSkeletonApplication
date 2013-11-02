@@ -14,35 +14,41 @@ use Zend\View\Model\ViewModel;
 
 class LanguageController extends AbstractActionController {
 
+	/**
+	 * Zend Translator Instance
+	 *
+	 * @var unknown
+	 */
 	protected $I_translator;
 
+	/**
+	 * Language Configuration Params
+	 *
+	 * @var array configuration params
+	 */
 	protected $am_languageConf;
 
+	/**
+	 * Constructor
+	 *
+	 * @param array $am_translationParams
+	 */
 	public function __construct(array $am_translationParams) {
 		$this->I_translator = $am_translationParams['translator'];
 		$this->am_languageConf = $am_translationParams['languages'];
 	}
 
+	/*
+	 * Redirects user to proper I18N site version
+	 *
+	 * Remove code below and prepare view file if you wish user to
+	 * manually select location/language.
+	 */
 	public function indexAction() {
 
-		$s_language = $this->am_languageConf['default'];
-		$s_accepted = strtolower($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+		$s_language = \Application\Module::getUserLocale($this->am_languageConf);
 
-		if (array_key_exists(substr($s_accepted, -2), $this->am_languageConf['available'])) {
-
-			// Is there a specific country version available (IE US)?
-			$s_language = $this->am_languageConf['available'][substr($s_accepted, -2)];
-
-		} else {
-
-			// Is there a generic language version available (IE GB)?
-			$s_userLocale = substr($s_accepted,0,2);
-			if (array_key_exists($s_userLocale, $this->am_languageConf['available'])) {
-				$s_language = $s_userLocale;
-			}
-
-		}
-
+		// Let's redirect user to selected I18N site version
 		return $this->redirect()->toRoute("locale",array("locale"=>$s_language));
 
     }

@@ -43,6 +43,15 @@
                     <ul class="nav navbar-nav">
                         <li class="active"><a href="<?php echo $this->url('error') ?>"><?php echo $this->translate('Home') ?></a></li>
                     </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+			        <?php foreach ($this->urlTranslations as $s_key => $am_info) { ?>
+			        	<?php if (!$am_info['current']) { ?>
+			        	<li><a href="<?php echo $am_info['url']; ?>"><?php echo $am_info['name']; ?></a></li>
+			        	<?php } ?>
+			        <?php } ?>
+			      </ul>
+
                 </div><!--/.nav-collapse -->
             </div>
         </nav>

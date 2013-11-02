@@ -96,6 +96,7 @@ class Module {
 
     	//extract application instance from input event
     	$I_application = $e->getParam('application');
+    	$I_router =$I_application->getServiceManager()->get('Router');
     	$am_config = $I_application->getConfig();
 
     	// Is there multi-language support enabled?
@@ -108,72 +109,98 @@ class Module {
     	}
 
     	//get current language
-    	$s_lang = $e->getRouteMatch()->getParam('locale');
+    	$I_routeMatch = $e->getRouteMatch();
+    	$s_lang = $I_routeMatch->getParam('locale');
 
     	$am_languageConfig = $am_config['mvlabs_environment']['locale'];
 
-    	// Following might cause SEO issues. Hence commented & special route created
-    	// if (empty($s_lang)) {
-    	//	$s_lang = $am_languageConfig['default'];
-    	// }
-
     	if (!array_key_exists($s_lang, $am_languageConfig['available'])) {
     		$I_application->getResponse()->setStatusCode(404);
+    		$s_lang = self::getUserLocale($am_languageConfig);
     	}
 
     	$I_translator = $I_application->getServiceManager()->get('translator');
     	$I_translator->setLocale($am_languageConfig['available'][$s_lang]['language']);
 
-    	/*
-    	$s_basePath = $I_app->getRequest()->getBasePath();
-    	$I_phpRenderer->plugin('basePath')->setBasePath($s_basePath);
-    	*/
+    	// We get translations from current URL in other languages (to be used when user picks a different language)
+    	$I_viewModel = $I_application->getMvcEvent()->getViewModel();
 
-    	// $viewModel = $I_app->getMvcEvent()->getViewModel();
+    	$am_languageConfig['selected'] = $s_lang;
+
     	//setting to view->layout->translatedURL
-    	// $viewModel->translatedURL = $this->getTranslatedURL();
+    	$I_viewModel->urlTranslations = $this->getTranslatedURL($am_languageConfig, $I_translator, $I_routeMatch, $I_router);
+
     }
 
 
+    public static function getUserLocale($am_languageConf) {
 
-    /**
-     * Returns the URI translated ready for the link for language change.
-     *
-     * @return String
-     */
-    private function getTranslatedURL(){
+    	// Default language is set
+    	$s_language = $am_languageConf['default'];
 
-    	/*
-    	//get lang, controller, action
-    	$s_url = parse_url($_SERVER['REQUEST_URI']);
+    	// Are we receiving a preference
+    	$s_accepted = strtolower($_SERVER['HTTP_ACCEPT_LANGUAGE']);
 
-    	$s_path = explode('/',substr($s_url['path'], 1, strlen($s_url['path'])));
-    	$s_lang = (isset($s_path[0]) ) ? $s_path[0] : '';
-    	switch ($s_lang) {
-    		case 'en':
-    			$s_newLang = 'it';
-    			break;
-    		default:
-    			$s_newLang = 'en';
-    			break;
+    	if (array_key_exists(substr($s_accepted, -2), $am_languageConf['available'])) {
+
+    		// Is there a specific country version available (IE US)?
+    		$s_language = $am_languageConf['available'][substr($s_accepted, -2)];
+
+    	} else {
+
+    		// Is there a generic language version available (IE en)?
+    		$s_userLocale = substr($s_accepted,0,2);
+    		if (array_key_exists($s_userLocale, $am_languageConf['available'])) {
+    			$s_language = $s_userLocale;
+    		}
+
     	}
 
-    	//define startup params and init gettext according to the new language
-    	$as_options = array(
-    			'locale' => $s_newLang,
-    			'content' => __DIR__ . "/../../resources/languages/$s_newLang/texts.mo",
-    			'disableNotices' => true
-    	);
+    	return $s_language;
 
-    	//get adapter
-    	$I_translateAdapter = new \Zend\Translator\Adapter\Gettext($as_options);
+    }
 
-    	$s_controller = (isset($s_path[1]) ) ? '/' . $I_translateAdapter->translate($s_path[1]) : '';
-    	$s_action = (isset($s_path[2]) ) ? '/' . $I_translateAdapter->translate($s_path[2]) : '';
 
-    	return '/' . $s_newLang . $I_translateAdapter->translate($s_controller) . $s_action ;
+    /**
+     * Returns the URI translated in available languages.
+     *
+     * @return array
+     */
+    private function getTranslatedURL($am_languageConfig, $I_translator, $I_routeMatch, $I_router){
 
-    	*/
+    	$as_result = array();
+
+    	// $I_translator = $I_application->getServiceManager()->get('translator');
+    	$am_params = $I_routeMatch->getParams();
+
+
+    	foreach($am_languageConfig['available'] as $s_locale => $am_configParams) {
+
+       		$am_configParams['current'] = false;
+    		if ($s_locale == $am_languageConfig['selected']) {
+    			$am_configParams['current'] = true;
+    		}
+
+    		$am_translatedParams = array();
+    		foreach ($am_params as $s_paramName => $m_paramValue) {
+    			// echo $s_paramName." ".$m_paramValue." - ";
+    			$am_translatedParams[$s_paramName] = $I_translator->translate($m_paramValue, 'default', $am_languageConfig['available'][$s_locale]['language']);
+    		}
+    		$am_translatedParams['locale'] = $s_locale;
+
+    		// $I_router = $I_application->getServiceManager()->get('Router');
+    		$am_configParams['url'] = $I_router->assemble(
+    				                                    $am_translatedParams,
+    				                                    array('name' => $I_routeMatch->getMatchedRouteName()
+    				                                 )
+    		);
+    		// $am_configParams['url'] =  '/' . $s_newLang . $I_translateAdapter->translate($s_controller) . $s_action;
+
+    		$as_result[$s_locale] = $am_configParams;
+
+    	}
+
+    	return $as_result;
 
     }
 

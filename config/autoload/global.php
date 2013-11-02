@@ -48,7 +48,8 @@ return array(
 			'locale' => array(
 					'available' => array(
 							'it' => array('language' => 'it_IT', 'name' => 'Italiano'),
-							'en' => array('language' => 'en_US', 'name' => 'Inglese'),
+							'en' => array('language' => 'en_US', 'name' => 'English'),
+							'es' => array('language' => 'es_ES', 'name' => 'Espanol'),
 					),
 					'default' => 'it',
 			),
