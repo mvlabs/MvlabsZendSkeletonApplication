@@ -42,6 +42,20 @@ return array(
         							'action'     => 'index',
         					),
         			),
+
+        			/*
+        			 * No Multilanguage:
+        			 * (remember to comment language-select below)
+        			'type' => 'Zend\Mvc\Router\Http\Literal',
+        			'options' => array(
+        						'route'    => '/',
+        						'defaults' => array(
+        								'controller' => 'Application\Controller\Index',
+        								'action'     => 'index',
+        						),
+        			),
+        			*/
+
         			'may_terminate' => true,
         			'child_routes' => array(
 
@@ -86,33 +100,32 @@ return array(
         	'avoid-duplicates' => array(
         			'type' => 'Zend\Mvc\Router\Http\Segment',
         			'options' => array(
-        					'route'    => '/[:locale]/index',
-        					'constraints' => array(
-        							'locale' => '[a-zA-Z]{2}',
-        					),
-        					'defaults' => array(
-        							'controller' => 'Application\Controller\Language',
-        							'action'     => 'duplicated',
-        					),
-
-        				'may_terminate' => true,
-        				'child_routes' => array(
-        						'index-action' => array(
-        								'type'    => 'Segment',
-        								'options' => array(
-        										'route'    => '/index',
-        										'defaults' => array(
-        													'controller' => 'Application\Controller\Language',
-        													'action'     => 'duplicated',
-        											),
-        									),
-        									'may_terminate' => true,
-        									'child_routes' => array(
-        											'wildcard' => array(
-        													'type' => 'Wildcard',
-        											),
-        									),
-        							),
+        				'route'    => '/[:locale]/index',
+        				'constraints' => array(
+        						'locale' => '[a-zA-Z]{2}',
+        				),
+        				'defaults' => array(
+        						'controller' => 'Application\Controller\Language',
+        						'action'     => 'duplicated',
+        				),
+        			),
+        			'may_terminate' => true,
+        			'child_routes' => array(
+        					'index-action' => array(
+        							'type'    => 'Segment',
+        							'options' => array(
+        									'route'    => '/index',
+        									'defaults' => array(
+        												'controller' => 'Application\Controller\Language',
+        												'action'     => 'duplicated',
+        										),
+        								),
+        								'may_terminate' => true,
+        								'child_routes' => array(
+        										'wildcard' => array(
+        												'type' => 'Wildcard',
+        										),
+        								),
         					),
         			),
         	),
@@ -131,7 +144,6 @@ return array(
         					),
         			),
         	),
-
         ),
     ),
 
