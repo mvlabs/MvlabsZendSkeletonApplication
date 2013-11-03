@@ -11,14 +11,10 @@ class LanguageControllerFactory implements FactoryInterface
      *
      * @return \Contents\Controller\IndexController;
      */
-    public function createService(ServiceLocatorInterface $serviceLocator) {
+    public function createService(ServiceLocatorInterface $I_controllerSL) {
 
-    	$am_config = $serviceLocator->getServiceLocator()->get('config');
-        $I_translator = $serviceLocator->getServiceLocator()->get('translator');
-
-        $am_transParams = array('translator' => $I_translator, 'languages' => $am_config['mvlabs_environment']['locale']);
-
-        return new LanguageController($am_transParams);
+    	$I_localeService = $I_controllerSL->getServiceLocator()->get('localeService');
+        return new LanguageController($I_localeService);
 
     }
 }

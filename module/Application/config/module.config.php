@@ -148,15 +148,34 @@ return array(
     ),
 
 
+    'service_manager' => array(
+    		'factories' => array(
+    				'localeService' => 'Application\Service\LocaleServiceFactory',
+    		)
+    ),
+
+
     'controllers' => array(
         'invokables' => array(
-            'Application\Controller\Error' => 'Application\Controller\ErrorController',
+            'error' => 'Application\Controller\ErrorController',
             'index' => 'Application\Controller\IndexController',
+            'docs' => 'Application\Controller\DocsController',
         ),
         'factories' => array(
         	'Application\Controller\Language' => 'Application\Controller\LanguageControllerFactory',
         ),
     ),
+
+
+    'view_helpers' => array(
+    	'invokables' => array(
+    			'languageMenu' => 'Application\View\Helper\Languagemenu',
+    		),
+    	'factories' => array(
+    			'localeUrl' => 'Application\View\Helper\LocaleurlFactory',
+    		),
+    ),
+
 
     'view_manager' => array(
 

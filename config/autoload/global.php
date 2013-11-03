@@ -28,11 +28,24 @@ return array(
 				'translation_file_patterns' => array(
 
 						array(
+								'type'     => 'gettext',
+								'base_dir' => __DIR__ . '/../../module/Application/resource/language/text',
+								'pattern'  => '%s.mo',
+						),
+
+						array(
 								'type'        => 'phparray',
-								'base_dir'    => __DIR__ . '/../../../vendor/zendframework/zendframework/resources/languages',
-								'pattern'     => '/it/Zend_Validate.php',//%s
+								'base_dir'    => __DIR__ . '/../../module/Application/languages/validate',
+								'pattern'     => '$s.php',
 								'text_domain' => 'default'
 						),
+
+						array(
+								'type'        => 'phparray',
+								'base_dir'    => __DIR__ . '/../../module/Application/languages/routes',
+								'pattern'     => '$s.php',//%s
+								'text_domain' => 'routing'
+						)
 
 				),
 		),
@@ -47,8 +60,8 @@ return array(
 			// Available locales are listed here. Default(above) must be among them
 			'locale' => array(
 					'available' => array(
-							'it' => array('language' => 'it_IT', 'name' => 'Italiano'),
 							'en' => array('language' => 'en_US', 'name' => 'English'),
+							'it' => array('language' => 'it_IT', 'name' => 'Italiano'),
 							'es' => array('language' => 'es_ES', 'name' => 'Espanol'),
 					),
 					'default' => 'it',

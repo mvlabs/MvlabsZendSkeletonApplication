@@ -15,28 +15,22 @@ use Zend\View\Model\ViewModel;
 class LanguageController extends AbstractActionController {
 
 	/**
-	 * Zend Translator Instance
+	 * Locale Service
 	 *
 	 * @var unknown
 	 */
-	protected $I_translator;
+	protected $I_localeService;
 
-	/**
-	 * Language Configuration Params
-	 *
-	 * @var array configuration params
-	 */
-	protected $am_languageConf;
 
 	/**
 	 * Constructor
 	 *
 	 * @param array $am_translationParams
 	 */
-	public function __construct(array $am_translationParams) {
-		$this->I_translator = $am_translationParams['translator'];
-		$this->am_languageConf = $am_translationParams['languages'];
+	public function __construct($I_localeService) {
+		$this->I_localeService = $I_localeService;
 	}
+
 
 	/*
 	 * Redirects user to proper I18N site version
@@ -46,12 +40,13 @@ class LanguageController extends AbstractActionController {
 	 */
 	public function indexAction() {
 
-		$s_language = \Application\Module::getUserLocale($this->am_languageConf);
+		$s_language = $this->I_localeService->getUserLocale();
 
 		// Let's redirect user to selected I18N site version
 		return $this->redirect()->toRoute("locale",array("locale"=>$s_language));
 
     }
+
 
     /*
      * Redirects user to proper canonical I18N site version
@@ -63,5 +58,6 @@ class LanguageController extends AbstractActionController {
     	return $this->redirect()->toRoute("locale", array("locale" => $this->params()->fromRoute('locale')));
 
     }
+
 
 }
