@@ -12,29 +12,39 @@ return array(
 	'router' => array(
         'routes' => array(
 
-        	/*
-        	'lang' => array(
-        		'route' => ':it.dev.skel.it',
-        		'constraints' => array(
-        				'subdomain' => 'it',
-        	)
-        	*/
-
         	'locale' => array(
-       				'type'    => 'Zend\Mvc\Router\Http\Segment',
+
+        			// You can choose one of these alternate ways of specifying language
+        			// either through hostname or first query param
+
+        			/*
+        			'type' => 'Hostname',
+        			'options' => array(
+        					'route'    => '[:locale].dev.skel.it',
+        					'constraints' => array(
+        							'locale' => '[a-zA-Z]{2}',
+        					),
+        					'defaults' => array(
+        							'controller' => 'index',
+        							'action'     => 'index',
+        					),
+        			),
+        			*/
+
+        			'type'    => 'Zend\Mvc\Router\Http\Segment',
         			'options' => array(
         					'route'    => '/[:locale]',
         					'constraints' => array(
         							'locale' => '[a-zA-Z]{2}',
         					),
         					'defaults' => array(
-        							'controller' => 'Application\Controller\Index',
+        							'controller' => 'index',
         							'action'     => 'index',
         					),
         			),
-
         			'may_terminate' => true,
         			'child_routes' => array(
+
         					'default' => array(
         							'type'    => 'Segment',
         							'options' => array(
@@ -44,6 +54,14 @@ return array(
         											'action'     => '[a-zA-Z][a-zA-Z0-9_-]*',
         									),
         									'defaults' => array(
+        										'controller' => 'index',
+        										'action'     => 'index',
+        									),
+        							),
+        							'may_terminate' => true,
+        							'child_routes' => array(
+        									'wildcard' => array(
+        											'type' => 'Wildcard',
         									),
         							),
         					),
@@ -65,9 +83,44 @@ return array(
         			),
         	),
 
+        	'avoid-duplicates' => array(
+        			'type' => 'Zend\Mvc\Router\Http\Segment',
+        			'options' => array(
+        					'route'    => '/[:locale]/index',
+        					'constraints' => array(
+        							'locale' => '[a-zA-Z]{2}',
+        					),
+        					'defaults' => array(
+        							'controller' => 'Application\Controller\Language',
+        							'action'     => 'duplicated',
+        					),
+
+        				'may_terminate' => true,
+        				'child_routes' => array(
+        						'index-action' => array(
+        								'type'    => 'Segment',
+        								'options' => array(
+        										'route'    => '/index',
+        										'defaults' => array(
+        													'controller' => 'Application\Controller\Language',
+        													'action'     => 'duplicated',
+        											),
+        									),
+        									'may_terminate' => true,
+        									'child_routes' => array(
+        											'wildcard' => array(
+        													'type' => 'Wildcard',
+        											),
+        									),
+        							),
+        					),
+        			),
+        	),
+
 
         	// Either a "select language" page can be created, or user can be redirected
         	// to proper location (default). Change language action in controller to allow manual language selection
+        	// COMMENT IF USING HOSTNAME BASED locale ROUTE
         	'language-select' => array(
         			'type' => 'Zend\Mvc\Router\Http\Literal',
         			'options' => array(
@@ -79,7 +132,6 @@ return array(
         			),
         	),
 
-
         ),
     ),
 
@@ -87,31 +139,12 @@ return array(
     'controllers' => array(
         'invokables' => array(
             'Application\Controller\Error' => 'Application\Controller\ErrorController',
-            'Application\Controller\Index' => 'Application\Controller\IndexController',
+            'index' => 'Application\Controller\IndexController',
         ),
         'factories' => array(
         	'Application\Controller\Language' => 'Application\Controller\LanguageControllerFactory',
         ),
     ),
-
-
-    'translator' => array(
-    		'translation_file_patterns' => array(
-    				array(
-    						'type'     => 'gettext',
-    						'base_dir' => __DIR__ . '/../resource/language',
-    						'pattern'  => '%s.mo',
-    				),
-
-    				array(
-    						'type'        => 'phparray',
-    						'base_dir'    => __DIR__ . '/../languages',
-    						'pattern'     => '/it/MVLabs_Validate.php',//%s
-    						'text_domain' => 'default'
-    				)
-    		),
-    ),
-
 
     'view_manager' => array(
 

@@ -53,4 +53,15 @@ class LanguageController extends AbstractActionController {
 
     }
 
+    /*
+     * Redirects user to proper canonical I18N site version
+     *
+     */
+    public function duplicatedAction() {
+
+    	// Let's redirect user to selected I18N site version
+    	return $this->redirect()->toRoute("locale", array("locale" => $this->params()->fromRoute('locale')));
+
+    }
+
 }

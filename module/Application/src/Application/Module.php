@@ -47,7 +47,7 @@ class Module {
 
 
 	/*
-	 *
+	 * Called up upon module bootstrap - initializes it
 	 */
 	public function onBootstrap(MvcEvent $I_e) {
 
@@ -129,10 +129,17 @@ class Module {
 
     	//setting to view->layout->translatedURL
     	$I_viewModel->urlTranslations = $this->getTranslatedURL($am_languageConfig, $I_translator, $I_routeMatch, $I_router);
+    	$I_viewModel->currentLanguage = $s_lang;
 
     }
 
 
+    /**
+     * Returns user locale from preferences, or default if none provided
+     *
+     * @param array locale conf for this application
+     * @return string selected locale for user
+     */
     public static function getUserLocale($am_languageConf) {
 
     	// Default language is set
@@ -162,9 +169,9 @@ class Module {
 
 
     /**
-     * Returns the URI translated in available languages.
+     * Returns currently invoked URI, translated in all available languages.
      *
-     * @return array
+     * @return array URI translations
      */
     private function getTranslatedURL($am_languageConfig, $I_translator, $I_routeMatch, $I_router){
 
@@ -176,15 +183,12 @@ class Module {
 
     	foreach($am_languageConfig['available'] as $s_locale => $am_configParams) {
 
-       		$am_configParams['current'] = false;
-    		if ($s_locale == $am_languageConfig['selected']) {
-    			$am_configParams['current'] = true;
-    		}
-
     		$am_translatedParams = array();
     		foreach ($am_params as $s_paramName => $m_paramValue) {
     			// echo $s_paramName." ".$m_paramValue." - ";
-    			$am_translatedParams[$s_paramName] = $I_translator->translate($m_paramValue, 'default', $am_languageConfig['available'][$s_locale]['language']);
+    			$am_translatedParams[$s_paramName] = $I_translator->translate($m_paramValue,
+    					                                                      'routing',
+    					                                                      $am_languageConfig['available'][$s_locale]['language']);
     		}
     		$am_translatedParams['locale'] = $s_locale;
 
@@ -203,7 +207,6 @@ class Module {
     	return $as_result;
 
     }
-
 
 
     /**

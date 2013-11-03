@@ -37,19 +37,19 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="<?php echo $this->url('error') ?>"><?php echo $this->translate('MV Labs Skeleton App') ?></a>
+                    <a class="navbar-brand" href="<?php echo $this->url('locale', array(), array('language' => $this->currentLanguage)) ?>"><?php echo $this->translate('MV Labs Skeleton App') ?></a>
                 </div>
                 <div class="collapse navbar-collapse">
                     <ul class="nav navbar-nav">
-                        <li class="active"><a href="<?php echo $this->url('error') ?>"><?php echo $this->translate('Home') ?></a></li>
+                        <li class="active"><a href="<?php echo $this->url('locale') ?>"><?php echo $this->translate('Home') ?></a></li>
                     </ul>
 
                     <ul class="nav navbar-nav navbar-right">
 			        <?php foreach ($this->urlTranslations as $s_key => $am_info) { ?>
-			        	<?php if (!$am_info['current']) { ?>
+			        	<?php if ($s_key != $this->currentLanguage) { ?>
 			        	<li><a href="<?php echo $am_info['url']; ?>"><?php echo $am_info['name']; ?></a></li>
 			        	<?php } ?>
-			        <?php } ?>
+			        <?php  } ?>
 			      </ul>
 
                 </div><!--/.nav-collapse -->
