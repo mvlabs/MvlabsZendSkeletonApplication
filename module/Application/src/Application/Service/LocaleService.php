@@ -102,7 +102,7 @@ class LocaleService {
      *
      * @return array URI translations
      */
-     public function getTranslatedURL(){
+     public function getTranslatedURL() {
 
 		$as_result = array();
 
@@ -127,7 +127,6 @@ class LocaleService {
 					array('name' => $I_routeMatch->getMatchedRouteName()
 					)
 			);
-			// $am_configParams['url'] =  '/' . $s_newLang . $I_translateAdapter->translate($s_controller) . $s_action;
 
 			$as_result[$s_locale] = $am_configParams;
 

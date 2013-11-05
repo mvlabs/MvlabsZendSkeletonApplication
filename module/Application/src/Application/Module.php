@@ -16,6 +16,7 @@ use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
 use Zend\Validator\AbstractValidator;
 
+
 class Module {
 
 	/**
@@ -83,7 +84,9 @@ class Module {
     	// Environment configuration parameters are set
         $this->loadConfig($am_config);
 
-        $I_application->getEventManager()->attach(\Zend\Mvc\MvcEvent::EVENT_DISPATCH, array($this, 'onDispatch'));
+
+        $I_application->getEventManager()->attach(\Zend\Mvc\MvcEvent:: EVENT_ROUTE, array($this, 'onRoute'));
+
 
 	}
 
@@ -92,35 +95,41 @@ class Module {
 	 * I18N depends on request URL, hence is performed herein
 	 * @param $e
 	 */
-    public function onDispatch($e) {
+    public function onRoute($I_e) {
 
     	//extract application instance from input event
-    	$I_application = $e->getParam('application');
-    	$I_router =$I_application->getServiceManager()->get('Router');
+    	$I_application = $I_e->getParam('application');
+    	$I_router = $I_application->getServiceManager()->get('Router');
 
     	$am_config = $I_application->getConfig();
     	$I_translator = $I_application->getServiceManager()->get('translator');
 
     	$I_localeService = $I_application->getServiceManager()->get('localeService');
-    	$I_routeMatch = $e->getRouteMatch();
+    	$I_routeMatch = $I_e->getRouteMatch();
 
     	// Is there multi-language support enabled?
     	if ('home' == $I_routeMatch->getMatchedRouteName() ||
-    		// '' == $e->getRouteMatch()->getParam('controller') ||
-    		!array_key_exists('locale', $am_config['router']['routes']) ||
-    		!array_key_exists('mvlabs_environment', $am_config) ||
-    	    !array_key_exists('locale', $am_config['mvlabs_environment'])) {
+    	// '' == $e->getRouteMatch()->getParam('controller') ||
+    	!array_key_exists('locale', $am_config['router']['routes']) ||
+    	!array_key_exists('mvlabs_environment', $am_config) ||
+    	!array_key_exists('locale', $am_config['mvlabs_environment'])) {
     		return;
     	}
 
     	//get current language
     	$s_lang = $I_routeMatch->getParam('locale');
-
     	$am_languageConfig = $am_config['mvlabs_environment']['locale'];
 
     	if (!array_key_exists($s_lang, $am_languageConfig['available'])) {
-    		$I_application->getResponse()->setStatusCode(404);
+
+    		// We set default locale
     		$s_lang = $I_localeService->getUserLocale();
+
+    		// We had expected for a locale to be set. An invalid one must have been choosen
+    		if ('locale' == $I_routeMatch->getMatchedRouteName()) {
+    			$I_application->getResponse()->setStatusCode(404);
+    		}
+
     	}
 
     	$I_translator = $I_application->getServiceManager()->get('translator');
@@ -130,6 +139,34 @@ class Module {
     	$I_viewModel = $I_application->getMvcEvent()->getViewModel();
 
     	$am_languageConfig['selected'] = $s_lang;
+
+    	// @FIXME: Set Default!
+    	$I_routeMatch->setParam("locale", $s_lang);
+    	$I_e->setRouteMatch($I_routeMatch);
+
+    	$s_getTextFile = null;
+    	$s_getTextFilePath = __DIR__ . "/../../../../vendor/zendframework/zendframework/resources/languages";
+    	list($s_language, $s_country) = explode("_", $am_languageConfig['available'][$s_lang]['language']);
+    	$s_locale = implode("_", array($s_language, strtoupper($s_country)));
+
+    	if (file_exists($s_getTextFilePath. '/' .  $s_locale."/Zend_Validate.php")) {
+    		$s_getTextFile = $s_getTextFilePath. '/' .  $s_locale."/Zend_Validate.php";
+    	} elseif (file_exists($s_getTextFilePath. '/' .  $s_lang."/Zend_Validate.php")) {
+    		$s_getTextFile = $s_getTextFilePath. '/' .  $s_lang."/Zend_Validate.php";
+    	}
+
+    	if (null !== $s_getTextFile) {
+
+    		$I_translator->addTranslationFile(
+    				'phparray',
+    				$s_getTextFile,
+    				'default',
+    				$am_languageConfig['available'][$s_lang]['language']
+    		);
+    		AbstractValidator::setDefaultTranslator($I_translator);
+
+    	}
+
 
     	$I_viewModel->urlTranslations = $I_localeService->getTranslatedURL();
     	$I_viewModel->currentLanguage = $s_lang;

@@ -17,7 +17,8 @@ return array(
 
     	'modules' => array(
                        'ZendDeveloperTools',
-    				   'MvlabsLumber'
+    				   'MvlabsLumber',
+    				   'PhlyContact'
                       ),
 
         'config_cache_enabled' => false,

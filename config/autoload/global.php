@@ -27,25 +27,12 @@ return array(
 		'translator' => array(
 				'translation_file_patterns' => array(
 
+						// Application Text Translations
 						array(
 								'type'     => 'gettext',
 								'base_dir' => __DIR__ . '/../../module/Application/resource/language/text',
 								'pattern'  => '%s.mo',
 						),
-
-						array(
-								'type'        => 'phparray',
-								'base_dir'    => __DIR__ . '/../../module/Application/languages/validate',
-								'pattern'     => '$s.php',
-								'text_domain' => 'default'
-						),
-
-						array(
-								'type'        => 'phparray',
-								'base_dir'    => __DIR__ . '/../../module/Application/languages/routes',
-								'pattern'     => '$s.php',//%s
-								'text_domain' => 'routing'
-						)
 
 				),
 		),
