@@ -14,10 +14,41 @@ namespace Application;
 
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
+use Zend\Validator\AbstractValidator;
 
-class Module
-{
+class Module {
 
+	/**
+	 * Application configuration is returned
+	 * @return array Application configuration
+	 */
+	public function getConfig()
+	{
+
+		return include __DIR__ . '/../../config/module.config.php';
+
+	}
+
+
+	/**
+	 * Returns autoloader configuration
+	 * @return multitype:multitype:multitype:string
+	 */
+	public function getAutoloaderConfig()
+	{
+		return array(
+				'Zend\Loader\StandardAutoloader' => array(
+						'namespaces' => array(
+								__NAMESPACE__ => __DIR__ ,
+						),
+				),
+		);
+	}
+
+
+	/*
+	 * Called up upon module bootstrap - initializes it
+	 */
 	public function onBootstrap(MvcEvent $I_e) {
 
     	$s_env = getenv('APPLICATION_ENV');
@@ -41,6 +72,10 @@ class Module
 
     	}
 
+    	// Form message translation enabled
+    	$I_translator = $I_application->getServiceManager()->get('translator');
+    	AbstractValidator::setDefaultTranslator($I_translator);
+
     	// Proper environment name is sent to the view part (for CSS or other customizations, if needed)
     	$I_viewModel = $I_application->getMvcEvent()->getViewModel();
     	$I_viewModel->environment = $s_env;
@@ -48,28 +83,103 @@ class Module
     	// Environment configuration parameters are set
         $this->loadConfig($am_config);
 
+        $I_application->getEventManager()->attach(\Zend\Mvc\MvcEvent::EVENT_DISPATCH, array($this, 'onDispatch'));
+
 	}
 
-    /**
-     * Application configuration is returned
-     * @return array Application configuration
-     */
-    public function getConfig()
-    {
 
-    	return include __DIR__ . '/../../config/module.config.php';
+	/**
+	 * I18N depends on request URL, hence is performed herein
+	 * @param $e
+	 */
+    public function onDispatch($e) {
+
+    	//extract application instance from input event
+    	$I_application = $e->getParam('application');
+    	$I_router =$I_application->getServiceManager()->get('Router');
+
+    	$am_config = $I_application->getConfig();
+    	$I_translator = $I_application->getServiceManager()->get('translator');
+
+    	$I_localeService = $I_application->getServiceManager()->get('localeService');
+    	$I_routeMatch = $e->getRouteMatch();
+
+    	// Is there multi-language support enabled?
+    	if ('home' == $I_routeMatch->getMatchedRouteName() ||
+    		// '' == $e->getRouteMatch()->getParam('controller') ||
+    		!array_key_exists('locale', $am_config['router']['routes']) ||
+    		!array_key_exists('mvlabs_environment', $am_config) ||
+    	    !array_key_exists('locale', $am_config['mvlabs_environment'])) {
+    		return;
+    	}
+
+    	//get current language
+    	$s_lang = $I_routeMatch->getParam('locale');
+
+    	$am_languageConfig = $am_config['mvlabs_environment']['locale'];
+
+    	if (!array_key_exists($s_lang, $am_languageConfig['available'])) {
+    		$I_application->getResponse()->setStatusCode(404);
+    		$s_lang = $I_localeService->getUserLocale();
+    	}
+
+    	$I_translator = $I_application->getServiceManager()->get('translator');
+    	$I_translator->setLocale($am_languageConfig['available'][$s_lang]['language']);
+
+    	// We get translations from current URL in other languages (to be used when user picks a different language)
+    	$I_viewModel = $I_application->getMvcEvent()->getViewModel();
+
+    	$am_languageConfig['selected'] = $s_lang;
+
+    	$I_viewModel->urlTranslations = $I_localeService->getTranslatedURL();
+    	$I_viewModel->currentLanguage = $s_lang;
 
     }
 
-    public function getAutoloaderConfig()
-    {
-        return array(
-            'Zend\Loader\StandardAutoloader' => array(
-                'namespaces' => array(
-                    __NAMESPACE__ => __DIR__ ,
-                ),
-            ),
-        );
+
+    /**
+     * Error handler which turns PHP errors into exceptions
+     *
+     * @param integer $i_type
+     * @param string $s_message
+     * @param string $s_file
+     * @param integer $i_line
+     * @throws Exception
+     */
+    public static function handlePhpErrors($i_type, $s_message, $s_file, $i_line) {
+    	if (!($i_type & error_reporting())) return;
+    	throw new Exception("Error: " . $s_message . " in file " . $s_file . " at line " . $i_line);
+    }
+
+
+    /**
+     * Redirects user to nice page after fatal has occurred
+     *
+     * @param string $s_redirectUrl URL where user is directed to after a fatal has occurred
+     * @param string $s_callback callback function to be called - IE for specific mailing/logging purposes
+     */
+    public static function handleFatalPhpErrors($s_redirectUrl, $s_callback = null) {
+
+    	if (php_sapi_name() != 'cli' && @is_array($e = @error_get_last())) {
+
+    		if (null != $s_callback) {
+
+    			// This is the most stuff we can get. All of this happens in a "new context" outside of framework
+    			$m_code = isset($e['type']) ? $e['type'] : 0;
+    			$s_msg = isset($e['message']) ? $e['message'] : '';
+    			$s_file = isset($e['file']) ? $e['file'] : '';
+    			$i_line = isset($e['line']) ? $e['line'] : '';
+
+    			$s_callback($s_msg, $s_file, $i_line);
+
+    		}
+
+    		header("location: ". $s_redirectUrl);
+
+    	}
+
+    	return false;
+
     }
 
 
@@ -106,6 +216,7 @@ class Module
 
     }
 
+
     /**
      * Takes care of loading mvlabs environment configuration parameters
      *
@@ -113,45 +224,46 @@ class Module
      */
     private function loadConfig(array $am_config) {
 
-    	if(array_key_exists('mvlabs_environment', $am_config)) {
-
-    		$am_environmentConf = $am_config['mvlabs_environment'];
-
-    		// PHP Settings are Set
-    		if (array_key_exists('php_settings', $am_environmentConf) &&
-    		    is_array($am_environmentConf['php_settings'])) {
-    			$this->setPhpEnvVars($am_environmentConf['php_settings']);
-    		}
-
-    		// Should we attempt to recover from fatal errors also - IE w/ a Redirection to a nicely crafted page?
-    		if (array_key_exists('recover_from_fatal', $am_environmentConf) &&
-    		    $am_environmentConf['recover_from_fatal']) {
-
-    			// @TODO: I'm sure there's a better way to obtain this...
-    			$s_redirectUrl = $am_config['router']['routes']['error']['options']['route'];
-
-    			$s_callback = null;
-    			if (array_key_exists('fatal_errors_callback', $am_environmentConf)) {
-    				$s_callback = $am_environmentConf['fatal_errors_callback'];
-    			}
-
-    			register_shutdown_function(array('Application\Module', 'handleFatalPhpErrors'),
-    			                           $s_redirectUrl, $s_callback);
-    		}
-
-    		// Should PHP errors be turned into exceptions?
-    		if (array_key_exists('exceptions_from_errors', $am_environmentConf) &&
-    		    $am_environmentConf['exceptions_from_errors']) {
-    			set_error_handler(array('Application\Module','handlePhpErrors'));
-    		}
-
-    		// Timezone is set
-    		$s_timeZone = (array_key_exists('default_timezone', $am_environmentConf)?$am_environmentConf['default_timezone']:'Europe/London');
-    		date_default_timezone_set($s_timeZone);
-
+    	if(!array_key_exists('mvlabs_environment', $am_config)) {
+    		return;
     	}
 
+    	$am_environmentConf = $am_config['mvlabs_environment'];
+
+    	// PHP Settings are Set
+    	if (array_key_exists('php_settings', $am_environmentConf) &&
+    		is_array($am_environmentConf['php_settings'])) {
+    		$this->setPhpEnvVars($am_environmentConf['php_settings']);
+    	}
+
+    	// Should we attempt to recover from fatal errors also - IE w/ a Redirection to a nicely crafted page?
+    	if (array_key_exists('recover_from_fatal', $am_environmentConf) &&
+    		$am_environmentConf['recover_from_fatal']) {
+
+    		// @TODO: I'm sure there's a better way to obtain this...
+    		$s_redirectUrl = $am_config['router']['routes']['error']['options']['route'];
+
+    		$s_callback = null;
+    		if (array_key_exists('fatal_errors_callback', $am_environmentConf)) {
+    			$s_callback = $am_environmentConf['fatal_errors_callback'];
+   			}
+
+    		register_shutdown_function(array('Application\Module', 'handleFatalPhpErrors'),
+    		                           $s_redirectUrl, $s_callback);
+    	}
+
+    	// Should PHP errors be turned into exceptions?
+    	if (array_key_exists('exceptions_from_errors', $am_environmentConf) &&
+    	    $am_environmentConf['exceptions_from_errors']) {
+    		set_error_handler(array('Application\Module','handlePhpErrors'));
+    	}
+
+    	// Timezone is set
+    	$s_timeZone = (array_key_exists('timezone', $am_environmentConf)?$am_environmentConf['timezone']:'Europe/London');
+    	date_default_timezone_set($s_timeZone);
+
     }
+
 
 	/**
 	 * Sets php environment variables
@@ -162,52 +274,6 @@ class Module
     	foreach($am_phpSettings as $key => $value) {
     		ini_set($key, $value);
     	}
-    }
-
-
-    /**
-     * Error handler which turns PHP errors into exceptions
-     *
-     * @param integer $i_type
-     * @param string $s_message
-     * @param string $s_file
-     * @param integer $i_line
-     * @throws Exception
-     */
-    public static function handlePhpErrors($i_type, $s_message, $s_file, $i_line) {
-    	if (!($i_type & error_reporting())) return;
-		throw new Exception("Error: " . $s_message . " in file " . $s_file . " at line " . $i_line);
-    }
-
-
-	/**
-	 * Redirects user to nice page after fatal has occurred
-	 *
-	 * @param string $s_redirectUrl URL where user is directed to after a fatal has occurred
-	 * @param string $s_callback callback function to be called - IE for specific mailing/logging purposes
-	 */
-    public static function handleFatalPhpErrors($s_redirectUrl, $s_callback = null) {
-
-    	if (php_sapi_name() != 'cli' && @is_array($e = @error_get_last())) {
-
-    		if (null != $s_callback) {
-
-    			// This is the most stuff we can get. All of this happens in a "new context" outside of framework
-    			$m_code = isset($e['type']) ? $e['type'] : 0;
-    			$s_msg = isset($e['message']) ? $e['message'] : '';
-    			$s_file = isset($e['file']) ? $e['file'] : '';
-    			$i_line = isset($e['line']) ? $e['line'] : '';
-
-    			$s_callback($s_msg, $s_file, $i_line);
-
-    		}
-
-    		header("location: ". $s_redirectUrl);
-
-    	}
-
-    	return false;
-
     }
 
 

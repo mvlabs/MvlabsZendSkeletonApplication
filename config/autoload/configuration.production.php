@@ -27,9 +27,6 @@ return array(
 
 		'mvlabs_environment' => array(
 
-			// Set this w/ the timezone of your running application
-			'default_timezone' => 'Europe/Rome',
-
 			// here you should set the hostname of your production host(s)
 			// production configuration will be allowed to run there only!
 			'allowed_hosts' => array('my.production.host')
