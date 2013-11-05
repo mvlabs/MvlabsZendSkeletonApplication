@@ -37,9 +37,15 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="<?php echo $this->url('locale', array(), array('language' => $this->currentLanguage)) ?>"><?php echo $this->translate('MV Labs Skeleton App') ?></a>
+
+                    <a class="navbar-brand" href="<?php echo $this->url('locale', array(), array('language' => $this->currentLanguage)) ?>">
+                    	<img src="/img/icon.png" height="18">
+                    	<?php echo $this->translate('MV Labs Skeleton App') ?>
+                    </a>
+
                 </div>
                 <div class="collapse navbar-collapse">
+
                     <ul class="nav navbar-nav">
                         <li><a href="<?php echo $this->localeUrl('locale') ?>"><?php echo $this->translate('Home') ?></a></li>
                         <li class="active"><a href="<?php echo $this->localeUrl('locale/default', array('controller' => 'docs')) ?>"><?php echo $this->translate('Documentation') ?></a></li>
@@ -47,6 +53,7 @@
                     </ul>
 
                     <?php echo $this->languageMenu("nav navbar-nav navbar-right"); ?>
+
 
                 </div><!--/.nav-collapse -->
             </div>
