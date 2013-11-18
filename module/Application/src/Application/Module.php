@@ -12,6 +12,10 @@
 
 namespace Application;
 
+use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
+use Zend\ModuleManager\Feature\ConfigProviderInterface;
+use Zend\ModuleManager\ModuleEvent;
+use Zend\ModuleManager\ModuleManager;
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
 use Zend\Validator\AbstractValidator;
@@ -46,7 +50,76 @@ class Module {
 		);
 	}
 
+	public function init(ModuleManager $moduleManager)
+	{
+	    //$moduleManager->getEventManager()->attach(ModuleEvent::EVENT_LOAD_MODULES_POST, array($this, 'setOptions'), 1010);
+	    $moduleManager->getEventManager()->attach(ModuleEvent::EVENT_LOAD_MODULES_POST, array($this, 'addLocaleToRoutes'), 1000);
+	
+	    $moduleManager->getEventManager()->attach(ModuleEvent::EVENT_LOAD_MODULES_POST, array($this, 'overrideViewHelperUrl'));
+	}
+	
+	
+	// override url view helper with new locale aware
+	public function overrideViewHelperUrl(ModuleEvent $I_e)
+	{
+	    $I_serviceLocator = $I_e->getParam('ServiceManager');
+	    $I_viewHelperManager = $I_serviceLocator->get('ViewHelperManager');
 
+	    // Configure URL view helper with router
+	    $I_viewHelperManager->setFactory('url', 'Application\View\Helper\LocaleurlFactory');
+	   
+	    
+	}
+	
+	public function addLocaleToRoutes(ModuleEvent $I_e)
+	{
+	    $I_config = $I_e->getConfigListener()->getMergedConfig(false);
+	    
+	    $I_routes = &$I_config['router']['routes'];
+	
+	    $as_availableValueArray = array_keys($I_config['mvlabs_environment']['locale']['available']);
+	    
+	    $s_localeConstraint = '(' . implode($as_availableValueArray, '|') . ')';
+	    
+	
+	    foreach ($I_routes as $s_key => &$as_route) {
+	        
+	        if (strtolower($as_route['type']) === 'literal' || $as_route['type'] === 'Zend\Mvc\Router\Http\Literal') {
+	            $as_route['type'] = 'Segment';
+	        }
+	        
+	        if (strtolower($as_route['type']) === 'segment' || $as_route['type'] === 'Zend\Mvc\Router\Http\Segment') {
+	            if (strpos($as_route['options']['route'], ':locale') === false) {
+	                $as_route['options']['route'] = '[/:locale]' . $as_route['options']['route'];
+	            }
+	            if (!isset($as_route['options']['constraints'])) $as_route['options']['constraints'] = array();
+	            $as_route['options']['constraints'] = array_merge(
+	                $as_route['options']['constraints'],
+	                array('locale' => $s_localeConstraint)
+	            );
+	        } elseif (strtolower($as_route['type']) === 'regex' || $as_route['type'] === 'Zend\Mvc\Router\Http\Regex') {
+	            if (strpos($as_route['options']['route'], '<locale>') === false) {
+	                $as_route['options']['route'] = '(/(?P<locale>'.$s_localeConstraint.'))?' . $as_route['options']['route'];
+	                $as_route['options']['spec'] = '/locale' . $as_route['options']['spec']; //@todo needs to make optional on assemling
+	            }
+	        } else {
+	            //throw something
+	        }
+	        
+	        //sets the default locale
+	        if (!isset($as_route['options']['defaults'])) 
+	            $as_route['options']['defaults'] = array();
+	        
+	        $as_route['options']['defaults'] = array_merge(
+	            $as_route['options']['defaults'],
+	            array('locale' => $I_config['mvlabs_environment']['locale']['default'])
+	        );
+	    }
+	
+	    $I_e->getConfigListener()->setMergedConfig($I_config);
+	}
+	
+	
 	/*
 	 * Called up upon module bootstrap - initializes it
 	 */
