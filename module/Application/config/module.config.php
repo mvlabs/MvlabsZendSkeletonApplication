@@ -84,13 +84,13 @@ return array(
         							),
         						),
 
-        						'contact' => array(
+        						/*'contact' => array(
         								'type' => 'Literal',
         								'options' => array(
         										'route' => '/contact',
         										'defaults' => array(
         												'__NAMESPACE__' => 'PhlyContact\Controller',
-        												'controller'    => 'Contact',
+        												'controller'    => 'PhlyContact\Controller\Contact',
         												'action'        => 'index',
         										),
         								),
@@ -115,7 +115,7 @@ return array(
         												),
         										),
         								),
-        						),
+        						),*/
 
 
         			),
@@ -202,10 +202,10 @@ return array(
         'invokables' => array(
             'Application\Controller\error' => 'Application\Controller\ErrorController',
             'Application\Controller\index' => 'Application\Controller\IndexController',
-            'Application\Controller\docs' => 'Application\Controller\DocsController',
+            'Application\Controller\docs' => 'Application\Controller\DocsController',            
         ),
         'factories' => array(
-        	'Application\Controller\Language' => 'Application\Controller\LanguageControllerFactory',
+        	'language' => 'Application\Controller\LanguageControllerFactory',
         ),
 
     ),
@@ -214,18 +214,8 @@ return array(
     'view_helpers' => array(
 
     	'factories' => array(
-    			'languageMenu' => 'Application\View\Helper\LanguagemenuFactory',
-    			'localeUrl' => 'Application\View\Helper\LocaleurlFactory',
-    			//'localeUr' => 'Application\View\Helper\LocaleurFactory',
-    		),
-
-    	'alias' => array(
-    			'url' => 'localeUrl',
-    			//'localeUr' => 'localeUrl',
-    		),
-
-    	'allow_override' => array(
-    			'url' => true,
+			'languageMenu' => 'Application\View\Helper\LanguagemenuFactory',
+			'localeUrl' => 'Application\View\Helper\LocaleurlFactory',
     	),
 
     ),
