@@ -10,11 +10,10 @@
 
     "require": {
         "php": ">=5.3.3",
-        "zendframework/zendframework": "2.2.*"
+        "zendframework/zendframework": "2.2.*",
+        "phly/phly-contact": "dev-master"
     },
-
-     "require-dev": {
-	"zendframework/zend-developer-tools": "dev-master",
-     }
-
+    "require-dev": {
+        "zendframework/zend-developer-tools": "dev-master"
+    }
 }
