@@ -10,11 +10,36 @@
 
     "require": {
         "php": ">=5.3.3",
-        "zendframework/zendframework": "2.2.*"
+        "zendframework/zendframework": "2.2.3",
+        "doctrine/doctrine-orm-module": "0.8.0",
+        "mvlabs/mvlabs-lumber": "dev-master"
     },
 
-     "require-dev": {
-	"zendframework/zend-developer-tools": "dev-master",
-     }
+    "require-dev": {
+        "behat/behat": "2.4.*@stable",
+        "behat/mink": "1.5.0",
+        "behat/mink-extension": "*",
+        "behat/mink-goutte-driver": "dev-master",
+        "mvlabs/zf2behat-extension": "dev-master",
+        "behat/mink-browserkit-driver": "dev-master",
+        "guzzle/guzzle": "3.5",
+        "phpspec/phpspec": "2.0.*@dev",
+        "zendframework/zend-developer-tools": "dev-master",
+        "zendframework/zftool": "dev-master"
+    },
+    "config": {
+        "bin/dir": "bin/"
+    },
+    "autoload": {
+        "psr-0": {
+            "Application": "module/Application/src"
+        }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/maraspin/MvlabsLumber.git"
+        }
+    ]
 
 }

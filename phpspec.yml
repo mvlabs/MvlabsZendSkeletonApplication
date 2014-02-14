@@ -1,0 +1,9 @@
+formatter.name: progress
+
+
+suites:        
+    Application:
+        namespace:    Application
+        spec_prefix:  Spec
+        src_path:     'module/Application/src/'
+        spec_path:    'module/Application/'
