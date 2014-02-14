@@ -1,0 +1,12 @@
+default:
+  extensions:
+      MvLabs\Zf2Extension\Zf2Extension:
+       config: config/application.config.php
+       module: Application
+      Behat\MinkExtension\Extension:
+       base_url: 'http://mvlabskeleton.local/'
+       goutte:   ~
+          
+
+  
+    

@@ -12,8 +12,10 @@
 return array(
 
     'modules' => array(
-                       'Application',
-                      ),
+        'Application',
+        'DoctrineModule',
+        'DoctrineORMModule'
+    ),
 
     // These are various options for the listeners attached to the ModuleManager
     'module_listener_options' => array(
@@ -68,7 +70,7 @@ return array(
     //     ),
     // )
 
-   // Initial configuration with which to seed the ServiceManager.
-   // Should be compatible with Zend\ServiceManager\Config.
-   // 'service_manager' => array(),
+    // Initial configuration with which to seed the ServiceManager.
+    // Should be compatible with Zend\ServiceManager\Config.
+    // 'service_manager' => array(),
 );
